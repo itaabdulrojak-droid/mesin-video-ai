@@ -18,12 +18,13 @@ def init_vertex_ai():
     try:
         # Membaca brankas rahasia Streamlit
         gcp_json_str = st.secrets["GCP_JSON"]
-        credentials_dict = json.loads(gcp_json_str)
-        
+        # Membersihkan karakter tak terlihat (seperti newline atau spasi ekstra) sebelum diload
+        credentials_dict = json.loads(gcp_json_str.strip())
+
         # Membuat otorisasi
         credentials = service_account.Credentials.from_service_account_info(credentials_dict)
         project_id = credentials_dict["project_id"]
-        
+
         # Inisialisasi Vertex AI
         vertexai.init(project=project_id, location="us-central1", credentials=credentials)
         return True
