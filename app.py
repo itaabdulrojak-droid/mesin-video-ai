@@ -56,13 +56,10 @@ if st.button("Generate Visual 🚀", use_container_width=True):
                 st.error(f"Gagal menghubungi server Groq: {e}")
                 st.stop()
                 
-        with st.spinner("🎨 Hugging Face sedang melukis gambar (Tunggu 10-20 detik)..."):
+        with st.spinner("🎨 Mesin gambar sedang melukis (Tunggu sebentar)..."):
             try:
-                            # 2. Mesin Gambar Alternatif (Pollinations AI - Bebas API Key)
-            try:
-                # Menggunakan requests.get untuk mengambil gambar secara langsung
+                # 2. Mesin Gambar Alternatif (Pollinations AI - Bebas API Key)
                 API_URL = "https://image.pollinations.ai/prompt/"
-                # Kita kirim prompt dari Groq dan minta ukuran persegi resolusi tinggi
                 response = requests.get(
                     API_URL + enhanced_prompt, 
                     params={"width": 1024, "height": 1024, "nologo": "true", "seed": 42}
