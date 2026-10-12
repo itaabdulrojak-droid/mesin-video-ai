@@ -91,12 +91,12 @@ if st.session_state.generated_image:
     
     st.divider()
     st.subheader("🎥 2. Mesin Penggerak Video")
-    st.info("💡 Silakan unggah gambar yang baru diunduh ke dalam mesin resmi Stability AI di bawah ini.")
+    st.info("💡 Menggunakan server mirror komunitas yang stabil (Stable Video Diffusion).")
     
-    # Menanamkan mesin resmi Stability AI
+    # Menanamkan mesin mirror komunitas yang lebih tahan banting
     import streamlit.components.v1 as components
-    components.iframe("https://stabilityai-stable-video-diffusion.hf.space", height=850, scrolling=True)
+    components.iframe("https://mediasynthesismuseum-stable-video-diffusion.hf.space", height=850, scrolling=True)
     
     st.divider()
-    st.write("Jika tampilan di atas terpotong atau sedang sibuk, gunakan jalur alternatif ini:")
-    st.link_button("🚀 Buka Mesin Video di Tab Baru (Layar Penuh)", "https://huggingface.co/spaces/stabilityai/stable-video-diffusion", use_container_width=True)
+    st.write("Jika tampilan di atas terpotong atau mesin sedang sibuk, klik jalur alternatif ini:")
+    st.link_button("🚀 Buka Mesin Video di Tab Baru", "https://huggingface.co/spaces/mediasynthesismuseum/stable-video-diffusion", use_container_width=True)
