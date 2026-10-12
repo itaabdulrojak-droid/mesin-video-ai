@@ -81,19 +81,22 @@ if st.button("🎨 Generate Visual", use_container_width=True):
 if st.session_state.generated_image:
     st.image(st.session_state.generated_image, caption="Frame Awal", use_container_width=True)
     
-    # Tombol unduh dipindah ke tengah agar mudah diakses
     st.download_button(
         label="💾 1. Unduh Gambar Ini Dulu", 
         data=st.session_state.image_bytes, 
-        file_name="frame.png", 
+        file_name="frame_kucing.png", 
         mime="image/png", 
         use_container_width=True
     )
     
     st.divider()
     st.subheader("🎥 2. Mesin Penggerak Video")
-    st.info("💡 Jalur Bypass: Karena server Streamlit memblokir API, kita tanamkan mesin videonya langsung di sini. Silakan unggah gambar yang baru saja diunduh ke dalam kotak di bawah ini.")
+    st.info("💡 Silakan unggah gambar yang baru diunduh ke dalam mesin resmi Stability AI di bawah ini.")
     
-    # Menanamkan Hugging Face Space (Stable Video Diffusion) langsung ke aplikasi
+    # Menanamkan mesin resmi Stability AI
     import streamlit.components.v1 as components
-    components.iframe("https://multimodalart-stable-video-diffusion.hf.space", height=750, scrolling=True)
+    components.iframe("https://stabilityai-stable-video-diffusion.hf.space", height=850, scrolling=True)
+    
+    st.divider()
+    st.write("Jika tampilan di atas terpotong atau sedang sibuk, gunakan jalur alternatif ini:")
+    st.link_button("🚀 Buka Mesin Video di Tab Baru (Layar Penuh)", "https://huggingface.co/spaces/stabilityai/stable-video-diffusion", use_container_width=True)
