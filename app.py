@@ -46,7 +46,7 @@ if st.button("Generate Visual 🚀", use_container_width=True):
                             "content": story_prompt,
                         }
                     ],
-                    model="llama-3.1-70b-versatile",
+                    model="openai/gpt-oss-120b",
                 )
                 enhanced_prompt = chat_completion.choices[0].message.content
                 st.success("✅ Skenario berhasil dipertajam oleh AI!")
