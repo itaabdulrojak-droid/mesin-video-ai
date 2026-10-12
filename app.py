@@ -81,40 +81,19 @@ if st.button("🎨 Generate Visual", use_container_width=True):
 if st.session_state.generated_image:
     st.image(st.session_state.generated_image, caption="Frame Awal", use_container_width=True)
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.download_button("💾 Unduh Gambar", data=st.session_state.image_bytes, file_name="frame.png", mime="image/png", use_container_width=True)
-        
-    with col2:
-        if st.button("🎥 Jadikan Video", type="primary", use_container_width=True):
-            with st.spinner("⏳ Menghidupkan gambar... (Bisa memakan waktu 1-3 menit)"):
-                try:
-                    # Mengirim gambar ke model Stable Video Diffusion di Hugging Face
-                    API_URL_VID = "https://api-inference.huggingface.co/models/stabilityai/stable-video-diffusion-img2vid-xt"
-                    headers = {"Authorization": f"Bearer {hf_key}"}
-                    
-                    response_vid = requests.post(API_URL_VID, headers=headers, data=st.session_state.image_bytes)
-                    
-                    if response_vid.status_code == 200:
-                        st.session_state.generated_video = response_vid.content
-                        st.success("✅ Video berhasil dianimasikan!")
-                    elif response_vid.status_code == 503:
-                        # Server gratis HF sering tertidur, kode 503 berarti server sedang "bangun"
-                        st.warning("Mesin video sedang dipanaskan (Loading Model). Silakan tunggu 30 detik dan klik tombol 'Jadikan Video' lagi.")
-                    else:
-                        st.error(f"Gagal membuat video. Code: {response_vid.status_code}. Pesan: {response_vid.text}")
-                except Exception as e:
-                    st.error(f"Terjadi kesalahan koneksi video: {e}")
-
-# --- MENAMPILKAN HASIL VIDEO ---
-if st.session_state.generated_video:
-    st.divider()
-    st.subheader("🎬 Hasil Render Video AI")
-    st.video(st.session_state.generated_video)
+    # Tombol unduh dipindah ke tengah agar mudah diakses
     st.download_button(
-        label="💾 Unduh Video (MP4)",
-        data=st.session_state.generated_video,
-        file_name="animasi_ai.mp4",
-        mime="video/mp4",
+        label="💾 1. Unduh Gambar Ini Dulu", 
+        data=st.session_state.image_bytes, 
+        file_name="frame.png", 
+        mime="image/png", 
         use_container_width=True
     )
+    
+    st.divider()
+    st.subheader("🎥 2. Mesin Penggerak Video")
+    st.info("💡 Jalur Bypass: Karena server Streamlit memblokir API, kita tanamkan mesin videonya langsung di sini. Silakan unggah gambar yang baru saja diunduh ke dalam kotak di bawah ini.")
+    
+    # Menanamkan Hugging Face Space (Stable Video Diffusion) langsung ke aplikasi
+    import streamlit.components.v1 as components
+    components.iframe("https://multimodalart-stable-video-diffusion.hf.space", height=750, scrolling=True)
