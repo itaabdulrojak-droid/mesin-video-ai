@@ -1,81 +1,78 @@
 import streamlit as st
-import time
-import json
-from google.oauth2 import service_account
-import vertexai
-# Catatan: Library khusus video (Veo) akan dipanggil melalui endpoint Vertex AI
+import requests
+import io
+from PIL import Image
+from groq import Groq
 
 # Konfigurasi Halaman
-st.set_page_config(page_title="AI Video Engine", page_icon="🎬", layout="centered")
+st.set_page_config(page_title="Mesin Master AI", page_icon="🎬", layout="centered")
 
-st.title("🎬 Mesin Generator Video AI (Vertex AI)")
-st.write("Ubah karakter statis menjadi adegan video animasi 3D.")
+st.title("🎬 Mesin Generator Visual AI")
+st.write("Menggunakan otak Groq (Llama 3) & mesin gambar Hugging Face (Stable Diffusion) tanpa biaya.")
 st.divider()
 
-# --- AUTENTIKASI GOOGLE CLOUD ---
-@st.cache_resource
-def init_vertex_ai():
-    try:
-        # Membaca brankas rahasia Streamlit
-        gcp_json_str = st.secrets["GCP_JSON"]
-        # Membersihkan karakter tak terlihat (seperti newline atau spasi ekstra) sebelum diload
-        credentials_dict = json.loads(gcp_json_str.strip())
+# --- SETUP API KEYS ---
+try:
+    groq_key = st.secrets["GROQ_API_KEY"]
+    hf_key = st.secrets["HF_API_KEY"]
+    client = Groq(api_key=groq_key)
+except Exception as e:
+    st.error("⚠️ Kunci API tidak ditemukan. Pastikan sudah disimpan di Secrets.")
+    st.stop()
 
-        # Membuat otorisasi
-        credentials = service_account.Credentials.from_service_account_info(credentials_dict)
-        project_id = credentials_dict["project_id"]
-
-        # Inisialisasi Vertex AI
-        vertexai.init(project=project_id, location="us-central1", credentials=credentials)
-        return True
-    except Exception as e:
-        st.error(f"Gagal memuat kunci rahasia: {e}")
-        return False
-
-kunci_aman = init_vertex_ai()
-
-# --- ANTARMUKA APLIKASI ---
-st.subheader("1. Referensi Karakter")
-uploaded_image = st.file_uploader("Upload foto karakter (JPG/PNG)", type=["jpg", "jpeg", "png"])
-
-if uploaded_image:
-    st.image(uploaded_image, caption="Karakter Siap Digunakan", width=250)
-
-st.subheader("2. Skenario Adegan")
+# --- ANTARMUKA ---
+st.subheader("Skenario Adegan")
 story_prompt = st.text_area(
-    "Deskripsikan adegan video:", 
-    placeholder="Contoh: Kucing oren gaya 3D Pixar, menengok marah dan berjalan pergi...", 
+    "Ketik ide cerita Anda (bisa bahasa Indonesia):", 
+    placeholder="Contoh: Seekor kucing oren 3D memakai kacamata hitam sedang berjalan santai di kota cyberpunk...", 
     height=100
 )
 
-st.divider()
-
-if st.button("Generate Video 🚀", use_container_width=True):
-    if not kunci_aman:
-        st.warning("⚠️ Kunci API Google Cloud belum terhubung dengan benar di Secrets.")
-    elif not uploaded_image:
-        st.warning("⚠️ Mohon upload foto referensi karakter terlebih dahulu.")
-    elif not story_prompt:
-        st.warning("⚠️ Deskripsi skenario tidak boleh kosong.")
+if st.button("Generate Visual 🚀", use_container_width=True):
+    if not story_prompt:
+        st.warning("⚠️ Ide cerita tidak boleh kosong.")
     else:
-        # Proses pengiriman ke Vertex AI
-        with st.spinner('Menghubungkan ke server Google Vertex AI...'):
-            time.sleep(2) # Simulasi handshake server
-            st.info("Mengunggah foto dan prompt ke model AI...")
-            
-            # Di lingkungan nyata, di sinilah fungsi prediksi API Vertex AI (Veo) dipanggil
-            # Karena proses render video AI butuh waktu 2-5 menit, kita beri indikator
-            progress_bar = st.progress(0)
-            for i in range(100):
-                time.sleep(0.05)
-                progress_bar.progress(i + 1)
-            
-            progress_bar.empty()
-            
-            # Menampilkan hasil
-            st.success("✅ Render selesai! (Status: Endpoint Vertex Terhubung)")
-            st.balloons()
-            
-            # Simulasi output video (Akan diganti dengan response.url dari Vertex nanti)
-            st.video("https://www.w3schools.com/html/mov_bbb.mp4")
-            st.caption("Ini adalah letak pemutar video asli saat endpoint model video Veo merespons.")
+        with st.spinner("🤖 Groq sedang meracik prompt profesional..."):
+            try:
+                # 1. Groq API (Menerjemahkan ide jadi prompt ahli)
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are an expert prompt engineer for AI image generators. Convert the user's idea into a highly detailed, descriptive image prompt in English. Focus on cinematic lighting, style, and 3D render qualities (like Pixar/Unreal Engine). Return ONLY the English prompt text, nothing else."
+                        },
+                        {
+                            "role": "user",
+                            "content": story_prompt,
+                        }
+                    ],
+                    model="llama3-8b-8192",
+                )
+                enhanced_prompt = chat_completion.choices[0].message.content
+                st.success("✅ Skenario berhasil dipertajam oleh AI!")
+                st.info(f"**Prompt Rahasia (Dikirim ke mesin gambar):** {enhanced_prompt}")
+                
+            except Exception as e:
+                st.error(f"Gagal menghubungi server Groq: {e}")
+                st.stop()
+                
+        with st.spinner("🎨 Hugging Face sedang melukis gambar (Tunggu 10-20 detik)..."):
+            try:
+                # 2. Hugging Face API (Teks ke Gambar - Stable Diffusion XL)
+                API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
+                headers = {"Authorization": f"Bearer {hf_key}"}
+                payload = {"inputs": enhanced_prompt}
+                
+                response = requests.post(API_URL, headers=headers, json=payload)
+                
+                if response.status_code == 200:
+                    image_bytes = response.content
+                    image = Image.open(io.BytesIO(image_bytes))
+                    
+                    st.balloons()
+                    st.success("✅ Berhasil! Ini adalah frame pertama untuk video Anda.")
+                    st.image(image, caption="Hasil Render Open Source")
+                else:
+                    st.error(f"Server Hugging Face sedang sibuk memuat model (Code: {response.status_code}). Silakan klik tombol Generate sekali lagi dalam beberapa detik.")
+            except Exception as e:
+                st.error(f"Terjadi kesalahan saat merender: {e}")
