@@ -46,7 +46,8 @@ if st.button("Generate Visual 🚀", use_container_width=True):
                             "content": story_prompt,
                         }
                     ],
-                    model="llama3-8b-8192",
+                    model="llama-3.1-8b-instant",
+",
                 )
                 enhanced_prompt = chat_completion.choices[0].message.content
                 st.success("✅ Skenario berhasil dipertajam oleh AI!")
