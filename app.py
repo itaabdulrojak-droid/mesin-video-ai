@@ -47,6 +47,7 @@ if st.button("Generate Visual 🚀", use_container_width=True):
                         }
                     ],
                     model="llama-3.1-8b-instant",
+
 ",
                 )
                 enhanced_prompt = chat_completion.choices[0].message.content
