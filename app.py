@@ -58,12 +58,15 @@ if st.button("Generate Visual 🚀", use_container_width=True):
                 
         with st.spinner("🎨 Hugging Face sedang melukis gambar (Tunggu 10-20 detik)..."):
             try:
-                # 2. Hugging Face API (Teks ke Gambar - Stable Diffusion XL)
-                API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-                headers = {"Authorization": f"Bearer {hf_key}"}
-                payload = {"inputs": enhanced_prompt}
-                
-                response = requests.post(API_URL, headers=headers, json=payload)
+                            # 2. Mesin Gambar Alternatif (Pollinations AI - Bebas API Key)
+            try:
+                # Menggunakan requests.get untuk mengambil gambar secara langsung
+                API_URL = "https://image.pollinations.ai/prompt/"
+                # Kita kirim prompt dari Groq dan minta ukuran persegi resolusi tinggi
+                response = requests.get(
+                    API_URL + enhanced_prompt, 
+                    params={"width": 1024, "height": 1024, "nologo": "true", "seed": 42}
+                )
                 
                 if response.status_code == 200:
                     image_bytes = response.content
@@ -71,8 +74,8 @@ if st.button("Generate Visual 🚀", use_container_width=True):
                     
                     st.balloons()
                     st.success("✅ Berhasil! Ini adalah frame pertama untuk video Anda.")
-                    st.image(image, caption="Hasil Render Open Source")
+                    st.image(image, caption="Hasil Render AI Alternatif")
                 else:
-                    st.error(f"Server Hugging Face sedang sibuk memuat model (Code: {response.status_code}). Silakan klik tombol Generate sekali lagi dalam beberapa detik.")
+                    st.error(f"Mesin gambar alternatif sibuk (Code: {response.status_code}). Coba lagi.")
             except Exception as e:
                 st.error(f"Terjadi kesalahan saat merender: {e}")
